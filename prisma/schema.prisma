@@ -19,6 +19,7 @@ model User {
   birthDate   DateTime
   cpf         String
   createdAt   DateTime     @default(now())
+  money       Float        @default(0)
   purchased   Tennis[]     @relation("purchasedTennis")
   Like        Like[]
   CartItem    CartItem[]
@@ -52,6 +53,8 @@ model Tennis {
   Offer         Offer[]
   Giveaway      Giveaway[]
   TennisBrand   TennisBrand[]
+  Boxes         Boxes?        @relation(fields: [boxesId], references: [id])
+  boxesId       String?
 }
 
 model Brand {
@@ -71,6 +74,16 @@ model InObserve {
   tennisId String?
 
   @@map("inobserve")
+}
+
+model Boxes {
+  id     String   @id @default(uuid())
+  photo  String
+  name   String   @unique
+  price  Float
+  Tennis Tennis[]
+
+  @@map("boxes")
 }
 
 model TennisBrand {
