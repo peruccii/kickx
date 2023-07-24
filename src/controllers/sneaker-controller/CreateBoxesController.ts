@@ -1,19 +1,35 @@
-import { Request, Response } from "express";
-import { boxesInterface } from "../../interfaces/sneakerInterfaces/boxesInterface";
-import { CreateBoxes } from "../../DAO/sneaker-dao/creates/CreateBoxes";
+import { Request, Response } from 'express';
+import { CreateBoxes } from '../../DAO/sneaker-dao/creates/CreateBoxes';
 
-export class CreateBoxesController {
-    async handle(req: Request<{}, {}, Omit<boxesInterface, "id">>, res: Response) {
-        try {
-            const {name, photo, price} = req.body
+export class BoxesController {
+  async create(request: Request, response: Response): Promise<Response> {
+    const { name, photo, price } = request.body;
 
-            const createBoxes = new CreateBoxes()
-            const rs = await createBoxes.execute({name, photo, price})
+    const createBoxes = new CreateBoxes();
+    const box = await createBoxes.execute({ name, photo, price });
 
-            return res.status(201).json(rs)
-        } catch (err) {
-            console.log("erro na controller", err);
-            
-        }
+    return response.json(box);
+  }
+
+  async addTennisToBox(request: Request, response: Response): Promise<Response> {
+    const { boxId, tennisIds } = request.body;
+
+    const createBoxes = new CreateBoxes();
+    await createBoxes.addTennisToBox(boxId, tennisIds);
+
+    return response.sendStatus(200);
+  }
+
+  async openBox(request: Request, response: Response): Promise<Response> {
+    try {
+      const { boxId, userId } = request.params;
+      
+      const createBoxes = new CreateBoxes();
+      const chosenTennis = await createBoxes.openBox(boxId, userId);
+      
+      return response.status(200).json(chosenTennis);
+    } catch (error) {
+      return response.status(500).json({ error: error });
     }
+  }
 }

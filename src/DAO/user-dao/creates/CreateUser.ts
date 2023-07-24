@@ -28,7 +28,7 @@ export class CreateUser {
             birthDate: birthDateE,
             cpf,
             email,
-            
+            money: 0
          }
       })
 

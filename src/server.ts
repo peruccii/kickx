@@ -1,5 +1,5 @@
 import "express-async-errors"
-import express, { NextFunction,Request, Response } from "express"
+import express, { NextFunction, Request, Response } from "express"
 import { Routes } from './routes/routes';
 import { AppError } from './errors/AppError';
 
@@ -10,7 +10,7 @@ app.use(cors())
 app.use(Routes, cors())
 
 app.use((err: Error, request: Request, response: Response, next: NextFunction) => {
-  if(err instanceof AppError){
+  if (err instanceof AppError) {
     return response.status(err.statusCode).json({
       status: "error",
       message: err.message
@@ -23,4 +23,4 @@ app.use((err: Error, request: Request, response: Response, next: NextFunction) =
   })
 })
 
-app.listen(3000, () => console.log("Server esta rodando na porta"));
+app.listen(4000, () => console.log("Server esta rodando🚀"));

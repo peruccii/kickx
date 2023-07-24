@@ -10,29 +10,37 @@ export class GetAllUsers {
           id: 'desc',
         },
         include: {
-          Tennis: {
+          purchased: {
             select: {
               id: true,
               photo: true,
               name: true,
-              price: true,
               code: true,
-              description: true,
               purchasedById: true,
+              description: true,
               size: true,
-              sellerId: true,
-              Offer: {
+              price: true,
+              Offer: true
+            },
+          },
+          selled: true,
+          TennisWon: {
+            select: {
+              Tennis: {
                 select: {
                   id: true,
+                  name: true,
+                  photo: true,
                   price: true,
-                  tennisId: true,
-                  userId: true,
+                  code: true
                 }
               }
             }
-          },
-        }
+          }
+        },
       });
+
+      
 
       res.json({ allUsers: allUsers })
     } catch (error) {

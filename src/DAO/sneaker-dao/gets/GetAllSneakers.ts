@@ -8,7 +8,12 @@ export class GetAllSneakers {
     const sneakers = await prismaClient.tennis.findMany({
       orderBy: {
        id : "desc",
-      }
+      },
+      include: {
+        seller: true,
+        Offer: true
+      },
+
     })
 
     res.json({ sneakers: sneakers }) 

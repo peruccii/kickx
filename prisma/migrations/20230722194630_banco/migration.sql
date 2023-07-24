@@ -7,7 +7,34 @@ CREATE TABLE "user" (
     "photo" TEXT,
     "birthDate" DATETIME NOT NULL,
     "cpf" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "money" REAL NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "tennis_won" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "tennisId" TEXT NOT NULL,
+    CONSTRAINT "tennis_won_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "tennis_won_tennisId_fkey" FOREIGN KEY ("tennisId") REFERENCES "Tennis" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "deposity" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "value" REAL NOT NULL,
+    CONSTRAINT "deposity_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Owner" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "codeValidation" TEXT NOT NULL
 );
 
 -- CreateTable
@@ -16,16 +43,22 @@ CREATE TABLE "Tennis" (
     "photo" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "used" BOOLEAN NOT NULL,
+    "used" BOOLEAN,
     "usedDuration" TEXT,
-    "fastSell" BOOLEAN NOT NULL DEFAULT false,
+    "fastSell" BOOLEAN DEFAULT false,
     "size" TEXT NOT NULL,
     "price" REAL NOT NULL,
     "code" TEXT NOT NULL,
-    "sellerId" TEXT NOT NULL,
+    "sellerId" TEXT,
     "purchasedById" TEXT,
-    CONSTRAINT "Tennis_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "user" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Tennis_purchasedById_fkey" FOREIGN KEY ("purchasedById") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    "boxesId" TEXT,
+    "ownerId" TEXT,
+    "userId" TEXT,
+    CONSTRAINT "Tennis_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Tennis_purchasedById_fkey" FOREIGN KEY ("purchasedById") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Tennis_boxesId_fkey" FOREIGN KEY ("boxesId") REFERENCES "boxes" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Tennis_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "Owner" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Tennis_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -36,6 +69,23 @@ CREATE TABLE "brands" (
 );
 
 -- CreateTable
+CREATE TABLE "inobserve" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "tennisId" TEXT,
+    CONSTRAINT "inobserve_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "inobserve_tennisId_fkey" FOREIGN KEY ("tennisId") REFERENCES "Tennis" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "boxes" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "photo" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "price" REAL NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "tennis_brand" (
     "tennisId" TEXT NOT NULL,
     "brandId" TEXT NOT NULL,
@@ -43,6 +93,16 @@ CREATE TABLE "tennis_brand" (
     PRIMARY KEY ("tennisId", "brandId"),
     CONSTRAINT "tennis_brand_tennisId_fkey" FOREIGN KEY ("tennisId") REFERENCES "Tennis" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "tennis_brand_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "brands" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "tennis_box" (
+    "tennisId" TEXT NOT NULL,
+    "boxId" TEXT NOT NULL,
+
+    PRIMARY KEY ("boxId", "tennisId"),
+    CONSTRAINT "tennis_box_tennisId_fkey" FOREIGN KEY ("tennisId") REFERENCES "Tennis" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "tennis_box_boxId_fkey" FOREIGN KEY ("boxId") REFERENCES "boxes" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -108,10 +168,16 @@ CREATE TABLE "premiun_user" (
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Owner_codeValidation_key" ON "Owner"("codeValidation");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Tennis_code_key" ON "Tennis"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "brands_name_key" ON "brands"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "boxes_name_key" ON "boxes"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "premiun_user_userId_key" ON "premiun_user"("userId");
