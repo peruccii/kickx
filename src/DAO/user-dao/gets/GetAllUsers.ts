@@ -10,6 +10,7 @@ export class GetAllUsers {
           id: 'desc',
         },
         include: {
+          endereco_usuario: true,
           purchased: {
             select: {
               id: true,
@@ -23,7 +24,23 @@ export class GetAllUsers {
               Offer: true
             },
           },
-          selled: true,
+          selled: {
+            select: {
+              id: true,
+              name: true,
+              photo: true,
+              description: true,
+              size: true,
+              price: true,
+              code: true,
+              used: true,
+              purchasedById: true,
+              sellerId: true,
+              usedDuration: true,
+              fastSell: true,
+              Offer: true
+            }
+          },
           TennisWon: {
             select: {
               Tennis: {
@@ -36,7 +53,8 @@ export class GetAllUsers {
                 }
               }
             }
-          }
+          },
+          Offer: true
         },
       });
 

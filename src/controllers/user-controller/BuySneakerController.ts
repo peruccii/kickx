@@ -16,7 +16,6 @@ export class BuySneakerController {
 
       return res.status(200).json({ message: 'Sneaker purchased successfully!' });
     } catch (error) {
-      // Handle errors and send appropriate responses
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ error: error.message });
       }

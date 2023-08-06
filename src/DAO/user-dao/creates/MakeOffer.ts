@@ -7,10 +7,14 @@ export interface OfferInterface {
   price: number
 }
 
-export class MakeOffer {
-  async execute(tennisId: string, userId: string,{ price }: OfferInterface): Promise<Offer> {
+export interface OfferInterfaceAccept {
+  codeTennis: string
+}
 
-      const userExists = await prismaClient.user.findFirst({
+export class MakeOffer {
+  async execute(tennisId: string, userId: string, { price }: OfferInterface): Promise<Offer> {
+
+    const userExists = await prismaClient.user.findFirst({
       where: {
         id: userId,
       },
@@ -30,19 +34,90 @@ export class MakeOffer {
       throw new AppError("sneaker not exist", 400)
     }
 
-    const rs = await prismaClient.offer.create({
-      data: {
-        tennisId,
-        userId,
-        price,
-        
+    if (userExists.money >= price) {
+      const rs = await prismaClient.offer.create({
+        data: {
+          tennisId,
+          userId,
+          price,
+        },
+      })
+      return rs
+    } else {
+      throw new AppError("To make an offer, you need money referring to your offer price", 400)
+    }
+  }
+
+  async acceptOffer(offerId: string, sellerId: string, buyerId: string, { codeTennis }: OfferInterfaceAccept): Promise<void> {
+    const offerExists = await prismaClient.offer.findUnique({
+      where: {
+        id: offerId
       }
     })
- 
-  
-    return rs
-    
-    
+    if (!offerExists)
+      throw new AppError("Offer not found", 404)
 
+    const codeExists = await prismaClient.tennis.findUnique({
+      where: {
+        code: codeTennis
+      }
+    })
+    if (!codeExists)
+      throw new AppError("Code not found", 404)
+
+    const buyer = await prismaClient.user.findFirst({
+      where: {
+        id: buyerId,
+      },
+    })
+
+    if (!buyer || buyer.money < offerExists.price)
+      throw new AppError("The buyer does't have the necessary money to purchase your tennis at this moment", 404)
+
+    if (codeExists) {
+      await prismaClient.$transaction([
+        prismaClient.user.update({
+          where: { id: buyerId },
+          data: { money: { decrement: offerExists.price } }
+        }),
+        prismaClient.user.update({
+          where: { id: sellerId },
+          data: { money: { increment: offerExists.price } }
+        }),
+        prismaClient.user.update({
+          where: { id: sellerId },
+          data: {
+            Offer: { disconnect: { id: offerId } },
+            selled: { disconnect: { code: codeTennis } }
+          }
+        }),
+        prismaClient.user.update({
+          where: { id: buyerId },
+          data: { purchased: { connect: { code: codeTennis } } }
+        }),
+        prismaClient.offer.delete({
+          where: { id: offerId },
+        }),
+      ]);
+    }
+  }
+  async declineOffer(offerId: string, userId: string): Promise<void> {
+    const userExists = await prismaClient.user.findFirst({
+      where: {
+        id: userId,
+      },
+    })
+    
+    const offerExists = await prismaClient.offer.findUnique({
+      where: {
+        id: offerId
+      }
+    })
+    if (!offerExists)
+      throw new AppError("Offer not found", 404)
+
+    await prismaClient.offer.delete({
+      where: { id: offerId },
+    })
   }
 }

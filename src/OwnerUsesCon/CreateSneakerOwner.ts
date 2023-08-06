@@ -12,10 +12,11 @@ export interface sneakerOwner{
   fastSell: boolean,
   size: string,
   price: number
+  quantity: number
 }
 
 export class CreateSneakerOwner {
-  async execute(ownerId: string, { name, photo, description, fastSell, size, price }: sneakerOwner): Promise<Tennis> {
+  async execute(ownerId: string, { name, photo, description, fastSell, size, price, quantity }: sneakerOwner): Promise<Tennis> {
     try {
       const generateCode = crypto.randomBytes(4).toString('hex');
 
@@ -37,6 +38,7 @@ export class CreateSneakerOwner {
           fastSell,
           size,
           price,
+          quantity,
           code: generateCode,
           Owner: {
             connect: {

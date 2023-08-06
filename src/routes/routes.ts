@@ -17,7 +17,10 @@ import { AddMoneyController } from '../controllers/user-controller/AddMoneyContr
 import { visualizerController } from '../OwnerUsesCon/VisualizerController';
 import { CreateSenakerOwnerController } from '../OwnerUsesCon/CreateSenakerOwnerController';
 import { BuySneakerController } from '../controllers/user-controller/BuySneakerController';
-
+import { AddQuantityController } from '../controllers/user-controller/AddQuantityController';
+import { validation } from '../middlewares/validation';
+import { enderecoBodyValidation } from '../schemas/userSchemas/EnderecoSchema';
+import EnderecoController from '../controllers/user-controller/EnderecoController';
 
 const Routes = Router()
 
@@ -32,9 +35,12 @@ const boxesController = new BoxesController()
 const getAllBoxesController = new GetAllBoxesController()
 const sneakerinBoxController = new SneakerinBoxController()
 const addMoneyController = new AddMoneyController()
+const addQuantityController = new AddQuantityController
 const VisualizerController = new visualizerController()
 const createSenakerOwnerController = new CreateSenakerOwnerController()
 const buySneakerController = new BuySneakerController()
+const acceptOffer = new MakeOfferController()
+const declineOffer = new MakeOfferController()
 
 const nodemailer = require("nodemailer")
 const stripe = require('stripe')('sk_test_51NFmiuB44rleyHUGDyWn2d7P48h5BMW19mZg0ujRGtqaR8Y6rs20B0wxqtMvBB0i96E6ocxJAO8ckFHuKQG7kaB000LooKGoZ0')
@@ -55,8 +61,24 @@ Routes.post('/user',
 createUserValidation,
 createUserController.handle)
 
+Routes.post(
+  "/endereco",
+  validation({ body: enderecoBodyValidation }),
+  EnderecoController.store
+);
+
+Routes.get("/endereco/:id", EnderecoController.getByUser);
+
 Routes.post('/offer/:userId/:tennisId',
 makeOfferController.handle)
+
+Routes.post('/offer/accept/:offerId/:sellerId/:buyerId',
+acceptOffer.acceptOffer
+)
+
+Routes.post('/offer/decline/:offerId/:userId',
+declineOffer.declineOffer
+)
 
 Routes.post('/brand', 
 createBrandValidation,
@@ -67,6 +89,7 @@ boxesController.create
 )
 
 Routes.patch('/users/:userId/money', addMoneyController.updateMoney);
+Routes.patch('/tennis/:tennisId/quantity', addQuantityController.updateQuantity);
 
 Routes.post('/boxes/add-tennis', sneakerinBoxController.handle);
 

@@ -14,7 +14,8 @@ export class visualizer {
               photo: true,
               description: true,
               code: true,
-              price: true
+              price: true,
+              quantity: true
             },
           }
         },

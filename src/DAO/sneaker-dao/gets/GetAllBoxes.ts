@@ -16,6 +16,7 @@ export class GetAllBoxes {
                   id: true,
                   name: true,
                   price: true,
+                  quantity: true
                 },
               },
             },
@@ -28,9 +29,9 @@ export class GetAllBoxes {
         const uniqueTennis: { [key: string]: any } = {}; 
 
         box.TennisBox.forEach((tennisObj) => {
-          const { id, name, price } = tennisObj.tennis;
+          const { id, name, price, quantity } = tennisObj.tennis;
           if (!uniqueTennis[id]) {
-            uniqueTennis[id] = { id, name, price };
+            uniqueTennis[id] = { id, name, price, quantity };
           }
         });
 

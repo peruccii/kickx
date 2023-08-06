@@ -32,7 +32,7 @@ export class CreateBoxes {
     const MIN_TENNIS_COUNT = 13;
 
     if (tennisIds.length < MIN_TENNIS_COUNT) {
-      throw new AppError(`You need to select at least ${MIN_TENNIS_COUNT} tennis or more`, 400);
+     throw new AppError(`You need to select at least ${MIN_TENNIS_COUNT} tennis or more`, 400);
     }
     const boxExists = await prisma.boxes.findUnique({
       where: { id: boxId },
@@ -164,9 +164,19 @@ export class CreateBoxes {
       },
     });
 
-   
+    if (chosenTennis.quantity !== null && chosenTennis.quantity > 0) {
+      await prisma.tennis.update({
+        where: { id: chosenTennis.id },
+        data: {
+          quantity: { decrement: 1 }
+        }
+      })
+    } else {
+      throw new AppError("O tenis ganho nao tem pares suficiente, porem, escolha tenis diferentes porem com os mesmos valores ou receba o dinheiro equivalente ao tenis", 
+      400)
+    }
 
-    await prisma.owner.update({
+      await prisma.owner.update({
       where: { id: process.env.idOwner },
       data: {
         Tennis: {
@@ -176,21 +186,19 @@ export class CreateBoxes {
         }
       }
     })
-
-   
-
+    
     if (chosenTennis.price > box.price) {
       await prisma.owner.update({
         where: { id: process.env.idOwner },
         data: {
-          balance: { decrement: chosenTennis.price - box.price}
+          balance: { decrement: chosenTennis.price - box.price }
         }
       })
     } else {
       await prisma.owner.update({
         where: { id: process.env.idOwner },
         data: {
-          balance: { increment:  Math.abs(chosenTennis.price - box.price)}
+          balance: { increment: Math.abs(chosenTennis.price - box.price) }
         }
       })
     }
@@ -200,7 +208,6 @@ export class CreateBoxes {
 
   async addTennisToBoxAndUpdatePrice(boxId: string, tennisIds: string[]): Promise<Boxes> {
     await this.addTennisToBox(boxId, tennisIds);
-
 
     const tennisPrices = await prisma.tennis.findMany({
       where: {
@@ -212,11 +219,10 @@ export class CreateBoxes {
       },
       select: {
         price: true,
+        id: true,
+        quantity: true
       },
     });
-
-    console.log(tennisPrices);
-
 
     const totalPrices = tennisPrices.reduce((acc, tennis) => acc + tennis.price, 0);
     const percentages = tennisPrices.map((tennis) => tennis.price / totalPrices);
@@ -232,10 +238,6 @@ export class CreateBoxes {
         price: finalPrice,
       },
     });
-
-
-    console.log(calculatedPrice);
-    console.log(totalPercentage);
 
     return updatedBox;
   }

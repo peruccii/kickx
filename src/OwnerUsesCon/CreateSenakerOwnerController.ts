@@ -10,11 +10,11 @@ export class CreateSenakerOwnerController {
   async handle(req: Request<{ ownerId: string}, {}, Omit<sneakerOwner, 'id'>>, res: Response) {
     try {
       const { ownerId } = req.params;
-      const { name, photo, description, fastSell, size, price } = req.body;
+      const { name, photo, description, fastSell, size, price, quantity } = req.body;
 
       const createSneaker = new CreateSneakerOwner();
 
-      const result = await createSneaker.execute(ownerId,{ name, photo, description, fastSell, size, price });
+      const result = await createSneaker.execute(ownerId,{ name, photo, description, fastSell, size, price, quantity });
 
       return res.status(201).json(result);
     } catch (err) {
